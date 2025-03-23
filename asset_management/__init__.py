@@ -20,10 +20,10 @@
 
 bl_info = {
     "name": "Asset Management",
-    "description": "",
+    "description": "blender4.4兼容性修复（20250322）",
     "author": "Legigan Jeremy AKA Pistiwique, Stephen Leger and Cedric "
-              "Lepiller aka Pitiwazou",
-    "version": (2, 7, 6),
+              "Lepiller aka Pitiwazou","某科学的大树"
+    "version": (2, 7, 7),
     "blender": (2, 93, 0),
     "location": "View3D",
     "doc_url": "http://blscripts.com/asset_management_doc",

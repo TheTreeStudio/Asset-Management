@@ -181,35 +181,6 @@ class ASSETM_OT_import_assets(Operator, IoCommonProps, AmObjects):
         return context.mode != 'EDIT_MESH' and \
                category.preview.preview != "NONE"
 
-
-    def __init__(self):
-        self._imported = None
-        self._collections = None
-        self._ob = None
-        self._tM = None
-        self._init_rot = 0
-        self._rot_z = 0
-        self._init_scale = 0
-        self._scale = 1
-
-        self._raycast = SL_Raycast()
-        self._cast_threshold = self._raycast._cast_threshold
-        self._hit = None
-        self._pos = ZERO
-        self._normal = None
-        self._target_ob = None
-
-        self._action = 'G'
-        self._action_dict = {'G': "_translate",
-                             'R': "_rotate",
-                             'S': "_resize"
-                             }
-        self._mouse_x = ZERO
-        self._io_import = bpy.context.window_manager.asset_management \
-            .io_import.objects
-        self._relationship_lines = \
-            bpy.context.space_data.overlay.show_relationship_lines
-
     def exit(self, context):
         if self._ob.name == "AM_root":
             self.clear_root(context, self._ob)
@@ -442,6 +413,27 @@ class ASSETM_OT_import_assets(Operator, IoCommonProps, AmObjects):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
+        # 初始化原 __init__ 中的变量
+        self._imported = None
+        self._collections = None
+        self._ob = None
+        self._tM = None
+        self._init_rot = 0
+        self._rot_z = 0
+        self._init_scale = 0
+        self._scale = 1
+        self._raycast = SL_Raycast()
+        self._cast_threshold = self._raycast._cast_threshold
+        self._hit = None
+        self._pos = ZERO
+        self._normal = None
+        self._target_ob = None
+        self._action = 'G'
+        self._action_dict = {'G': "_translate", 'R': "_rotate", 'S': "_resize"}
+        self._mouse_x = ZERO
+        self._io_import = context.window_manager.asset_management.io_import.objects
+        self._relationship_lines = context.space_data.overlay.show_relationship_lines
+        
         if not os.path.exists(self.filepath):
             return self.path_report(self)
 
@@ -712,6 +704,10 @@ class ASSETM_OT_save_asset(Operator, AmExportHelper):
                 io_objects.use_existing_thumb)))
 
     def execute(self, context):
+        # 初始化父类的属性（替代 __init__ 中的逻辑）
+        self._category = LM.active_category
+        self._existing_files = [asset.name for asset in self.category.assets]
+
         io_objects = self.get_asset_properties('objects')
         filename = io_objects.filename
         Console.clear_output()
@@ -792,19 +788,6 @@ class ASSETM_OT_import_materials(Operator, CommonIoMaterial, AmMaterials):
         #         category.preview.preview != "NONE")
         category = LM.active_category
         return context.mode == 'OBJECT' and category.preview.preview != "NONE"
-
-    def __init__(self):
-        self._material = None
-        self._highlighted = None
-        self._strucked = {}
-
-        self._raycast = SL_Raycast()
-        self._hit = None
-        self._ob = None
-        self._face_idx = None
-        self._modifiers = []
-
-        self._cast = None
 
     def exit(self, context, exit='FINISHED'):
         if self._raycast is not None:
@@ -923,6 +906,17 @@ class ASSETM_OT_import_materials(Operator, CommonIoMaterial, AmMaterials):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
+        # 初始化原 __init__ 中的变量
+        self._material = None
+        self._highlighted = None
+        self._strucked = {}
+        self._raycast = SL_Raycast()
+        self._hit = None
+        self._ob = None
+        self._face_idx = None
+        self._modifiers = []
+        self._cast = None
+        
         if not os.path.exists(self.filepath):
             return self.path_report(self)
 
@@ -1050,6 +1044,9 @@ class ASSETM_OT_save_material(Operator, AmExportHelper):
 
     def execute(self, context):
         bpy.context.window.cursor_set('WAIT')
+        # 初始化父类的关键属性
+        self._category = LM.active_category
+        self._existing_files = [asset.name for asset in self.category.assets]        
 
         io_materials = self.get_asset_properties('materials')
         saved_materials = {}
@@ -1152,6 +1149,10 @@ class ASSETM_OT_save_scene(Operator, AmExportHelper):
     bl_options = {'REGISTER'}
 
     def execute(self, context):
+        # 初始化父类的关键属性
+        self._category = LM.active_category
+        self._existing_files = [asset.name for asset in self.category.assets]  
+        
         io_scenes = self.get_asset_properties('scenes')
         filename = AmName.get_valid_name(io_scenes.filename,
                                          self.existing_files)
@@ -1236,6 +1237,7 @@ class ASSETM_OT_save_ibl(Operator, ImportHelper):
         split.prop(addon_pref.import_export, 'thumb_resolution', text="")
 
     def execute(self, context):
+        
         files = [file.name for file in self.files if file.name != ""]
 
         if not files:
